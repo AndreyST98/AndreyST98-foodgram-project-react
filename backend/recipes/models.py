@@ -1,9 +1,10 @@
-from django.db import models
 from colorfield.fields import ColorField
+from django.conf import settings
+from django.core import validators
 from django.db import models
 from user.models import CustomUser
-from django.core import validators
-from django.conf import settings
+
+
 User = CustomUser
 
 
@@ -68,14 +69,18 @@ class IngredientAmount(models.Model):
 
     class Meta:
         verbose_name = 'Ингридиенты в рецептах'
+    constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_ingredient')]
 
     def __str__(self):
         return (f"{self.ingredient.name}"
                 f"{self.amount}{self.ingredient.measurement_unit}")
 
 
-class Recipes(models.Model):
-    tags = models.ManyToManyField(Tag, related_name='tags',
+class Recipe(models.Model):
+    tags = models.ManyToManyField(Tag, related_name='recipes',
                                   verbose_name='Ссылка')
     author = models.ForeignKey(
         User,
@@ -84,7 +89,7 @@ class Recipes(models.Model):
         verbose_name='Автор рецепта',
     )
     ingredients = models.ManyToManyField(IngredientAmount,
-                                         related_name='ingredients',
+                                         related_name='recipes',
                                          verbose_name='Ингредиенты')
     name = models.CharField(max_length=100, verbose_name='Название рецепта')
     image = models.ImageField(
@@ -97,8 +102,6 @@ class Recipes(models.Model):
             verbose_name='Время приготовления')
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True,
                                     db_index=True)
-    is_favorited = models.BooleanField(default=False)
-    is_in_shopping_cart = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-pub_date']
@@ -113,12 +116,16 @@ class Favorite(models.Model):
     """ Модель для Избранного. """
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              related_name='user')
-    recipes = models.ForeignKey(Recipes, on_delete=models.CASCADE,
-                                related_name='favor')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               related_name='favorite_recipe')
 
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_user_recipe')]
 
 
 class ShopList(models.Model):
@@ -126,12 +133,16 @@ class ShopList(models.Model):
 
     customer = models.ForeignKey(User, on_delete=models.CASCADE,
                                  related_name='customer')
-    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE,
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
                                related_name='cart_recipe')
 
     class Meta:
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['customer', 'recipe'],
+                name='unique_customer_recipe')]
 
 
 class Follow(models.Model):
@@ -146,3 +157,7 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'],
+                name='unique_following')]

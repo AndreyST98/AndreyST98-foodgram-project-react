@@ -9,12 +9,11 @@ from rest_framework.response import Response
 from user.models import CustomUser
 from user.serializers import CustomUserSerializer
 
-from .models import Favorite, Follow, Ingredient, Recipes, ShopList, Tag
+from .models import Favorite, Follow, Ingredient, Recipe, ShopList, Tag
 from .serializers import (FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipeFollowSerializer,
-                          RecipesCreateSerializer,
-                          RecipesSerializer, TagSerializer,
-                          UserFollowSerializer)
+                          RecipesCreateSerializer, RecipesSerializer,
+                          TagSerializer, UserFollowSerializer)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -88,7 +87,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
 class RecipesViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = RecipesSerializer
-    queryset = Recipes.objects.all()
+    queryset = Recipe.objects.all().order_by('-id')
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
 
@@ -110,12 +109,12 @@ class RecipesViewSet(viewsets.ModelViewSet):
         с обработкой исключения .
         """
         user = request.user
-        recipe = get_object_or_404(Recipes, id=pk)
-        if Favorite.objects.filter(user=user, recipes=recipe).exists():
+        recipe = get_object_or_404(Recipe, id=pk)
+        if Favorite.objects.filter(user=user, recipe=recipe).exists():
             return Response('Рецепт уже добавлен в избранное',
                             status=status.HTTP_400_BAD_REQUEST)
-        favorite = Favorite.objects.create(user=user, recipes=recipe)
-        serializer = RecipeFollowSerializer(favorite.recipes)
+        favorite = Favorite.objects.create(user=user, recipe=recipe)
+        serializer = RecipeFollowSerializer(favorite.recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @recipe_id_favorite.mapping.delete
@@ -125,8 +124,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         с обработкой исключения .
         """
         user = request.user
-        recipe = get_object_or_404(Recipes, id=pk)
-        if not Favorite.objects.filter(user=user, recipes=recipe).exists():
+        recipe = get_object_or_404(Recipe, id=pk)
+        if not Favorite.objects.filter(user=user, recipe=recipe).exists():
             return Response('Рецепт отсутствует в избранном',
                             status=status.HTTP_400_BAD_REQUEST)
         favorite = Favorite.objects.get(user=user, recipes=recipe)
@@ -141,7 +140,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         с обработкой исключения .
         """
         user = request.user
-        recipe = get_object_or_404(Recipes, id=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
         if ShopList.objects.filter(customer=user, recipe=recipe).exists():
             return Response('Рецепт добавлен в список',
                             status=status.HTTP_400_BAD_REQUEST)
@@ -156,7 +155,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         с обработкой исключения .
         """
         user = request.user
-        recipe = get_object_or_404(Recipes, id=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
         if not ShopList.objects.filter(user=user, recipe=recipe).exists():
             return Response('Рецепт отсутствует в списоке покупок',
                             status=status.HTTP_400_BAD_REQUEST)
