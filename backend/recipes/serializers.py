@@ -41,7 +41,10 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipesSerializer(serializers.ModelSerializer):
     """ Сериализатор для рецептов. """
     author = CustomUserSerializer(read_only=True)
-    ingredients = RecipeIngredientSerializer(many=True)
+    ingredients = RecipeIngredientSerializer(
+        many=True,
+        required=True,
+        source='ingredients_in_recipe')
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -64,13 +67,13 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         if self.context['request'].user.is_authenticated:
             current_user = self.context['request'].user
-            return ShopList.objects.filter(customer=current_user,
+            return ShopList.objects.filter(user=current_user,
                                            recipe=obj).exists()
 
-    # def validate_is_in_shopping_cart(self, data):
-    #     if 'request' not in self.context:
-    #         raise serializers.ValidationError('Invalid request')
-    #     return data
+    def validate(self, data):
+        if 'request' not in self.context:
+            raise serializers.ValidationError('Invalid request')
+        return data
 
 
 class CreateIngredientRecipeSerializer(serializers.ModelSerializer):
@@ -109,54 +112,48 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
         tags_list = []
         for tag in tags:
             if tag in tags_list:
-                raise serializers.ValidationError({
+                raise serializers.ValidationError(
                     'Тэги должны быть уникальными!'
-                })
+                )
             tags_list.append(tag)
         return data
 
-    def create_ingredients(self, ingredients, recipes):
+    def create_ingredients(self, ingredients, recipe):
         create_ingredient = [
-                IngredientAmount.objects.get(recipes=recipes, ingredient=Ingredient.objects.get(pk=ingredient['id']),amount=ingredient['amount'])
-                for ingredient in ingredients]
+            IngredientAmount(
+                recipe=recipe,
+                ingredient=Ingredient.objects.get(pk=ingredient["id"]),
+                amount=ingredient['amount']
+            )
+            for ingredient in ingredients]
         IngredientAmount.objects.bulk_create(create_ingredient)
 
     def create(self, validated_data):
         request = self.context.get('request')
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipes = Recipe.objects.create(author=request.user, **validated_data)
-        # for ingredient in ingredients:
-        #     temp = IngredientAmount.objects.create(
-        #         ingredient=Ingredient.objects.get(pk=ingredient['id']),
-        #         amount=ingredient['amount'])
-        #    recipe.ingredients.add(temp)
-        for tag in tags:
-            recipes.tags.add(tag)
-        self.create_ingredients(ingredients, recipes)
-        return recipes
-
-    # def create(self, validated_data):
-    #     ingredients = validated_data.pop('ingredients')
-    #     tags = validated_data.pop('tags')
-    #     recipe = Recipe.objects.create(**validated_data)
-    #     recipe.tags.set(tags)
-    #     self.create_ingredients(ingredients, recipe)
-    #     return recipe
+        recipe = Recipe.objects.create(author=request.user, **validated_data)
+        recipe.tags.add(*tags)
+        self.create_ingredients(ingredients, recipe)
+        return recipe
 
     def update(self, instance, validated_data):
-        ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
-        for ingredient in ingredients:
-            temp = IngredientAmount.objects.create(
-                ingredient=Ingredient.objects.get(
-                    pk=ingredient['id']),
-                amount=ingredient['amount'])
-            instance.ingredients.add(temp)
-        instance.tags.clear()
-        for tag in tags:
-            instance.tags.add(tag)
-        return super().update(instance, validated_data)
+        if 'ingredients' in validated_data:
+            ingredients = validated_data.pop('ingredients')
+            instance.ingredients.clear()
+            self.create_ingredients(ingredients, instance)
+        if 'tags' in validated_data:
+            instance.tags.set(
+                validated_data.pop('tags'))
+        return super().update(
+            instance, validated_data)
+
+    def to_representation(self, instance):
+        return RecipesSerializer(
+            instance,
+            context={
+                'request': self.context.get('request')
+            }).data
 
 
 class RecipeFollowSerializer(RecipesSerializer):
@@ -179,18 +176,12 @@ class UserFollowSerializer(CustomUserSerializer):
                   'is_subscribed', 'recipes', 'recipes_count')
         model = CustomUser
 
-    def get_recipes(self, obj):
-        request = self.context['request']
-        limit = request.GET.get('recipes_limit')
-        queryset = Recipe.objects.filter(author=obj)
-        if limit:
-            queryset = queryset[:int(limit)]
-            return RecipeFollowSerializer(queryset, many=True).data
-        return RecipeFollowSerializer(queryset, many=True).data
-
-    def get_recipes_count(self, obj):
-        recipes = Recipe.objects.filter(author=obj)
-        return recipes.count()
+    def to_representation(self, instance):
+        authors = FollowSerializer(
+                  instance.author, context={
+                                   'request': self.context.get('request')}
+        )
+        return authors.data
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -241,7 +232,7 @@ class FollowCreateSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate(self, data):
+    def validate_following(self, data):
         user = data['user']
         current_follow = data['following']
         if user == current_follow:

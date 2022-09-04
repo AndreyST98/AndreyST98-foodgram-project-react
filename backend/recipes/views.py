@@ -14,6 +14,8 @@ from .serializers import (FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipeFollowSerializer,
                           RecipesCreateSerializer, RecipesSerializer,
                           TagSerializer, UserFollowSerializer)
+from .permissions import IsAuthenticated
+from .utils import delete_obj_view, adding_obj_view
 
 
 class CustomUserViewSet(UserViewSet):
@@ -23,11 +25,7 @@ class CustomUserViewSet(UserViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     pagination_class = PageNumberPagination
-
-    def get_permissions(self):
-        if self.action == 'me':
-            return (IsAuthenticated(),)
-        return super().get_permissions()
+    permission_classes = (IsAuthenticated,)
 
     @action(detail=True, url_path='subscribe')
     def user_subscribe_add(self, request, id):
@@ -109,13 +107,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         с обработкой исключения .
         """
         user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if Favorite.objects.filter(user=user, recipe=recipe).exists():
-            return Response('Рецепт уже добавлен в избранное',
-                            status=status.HTTP_400_BAD_REQUEST)
-        favorite = Favorite.objects.create(user=user, recipe=recipe)
-        serializer = RecipeFollowSerializer(favorite.recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        model = Favorite
+        return adding_obj_view(model=model, user=user, pk=pk)
 
     @recipe_id_favorite.mapping.delete
     def recipe_id_favorite_del(self, request, pk):
@@ -124,13 +117,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         с обработкой исключения .
         """
         user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if not Favorite.objects.filter(user=user, recipe=recipe).exists():
-            return Response('Рецепт отсутствует в избранном',
-                            status=status.HTTP_400_BAD_REQUEST)
-        favorite = Favorite.objects.get(user=user, recipes=recipe)
-        favorite.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        model = Favorite
+        return delete_obj_view(model=model, user=user, pk=pk)
 
     @action(detail=True, url_path='shopping_cart', methods=['POST', 'GET'],
             permission_classes=[IsAuthenticated])
@@ -140,25 +128,15 @@ class RecipesViewSet(viewsets.ModelViewSet):
         с обработкой исключения .
         """
         user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if ShopList.objects.filter(customer=user, recipe=recipe).exists():
-            return Response('Рецепт добавлен в список',
-                            status=status.HTTP_400_BAD_REQUEST)
-        add_cart = ShopList.objects.create(customer=user, recipe=recipe)
-        serializer = RecipeFollowSerializer(add_cart.recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        model = ShopList
+        return adding_obj_view(model=model, user=user, pk=pk)
 
     @recipe_cart.mapping.delete
     def recipe_cart_del(self, request, pk):
         """
-        Метод удаления рецепта в список покупок
+        Метод удаления рецепта из списка покупок
         с обработкой исключения .
         """
         user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        if not ShopList.objects.filter(user=user, recipe=recipe).exists():
-            return Response('Рецепт отсутствует в списоке покупок',
-                            status=status.HTTP_400_BAD_REQUEST)
-        favorite = ShopList.objects.get(user=user, recipe=recipe)
-        favorite.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        model = ShopList
+        return delete_obj_view(model=model, user=user, pk=pk)
