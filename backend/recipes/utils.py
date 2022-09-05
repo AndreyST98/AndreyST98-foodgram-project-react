@@ -26,9 +26,3 @@ def delete_obj_view(model, user, pk):
     obj = model.objects.filter(user=user, recipe__id=pk)
     obj.delete()
     return Response(status=HTTP_204_NO_CONTENT)
-
-
-def download_card(download_list, filename):
-    response = HttpResponse(download_list, 'Content-Type: text/plain')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    return response
