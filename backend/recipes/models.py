@@ -4,7 +4,6 @@ from django.core import validators
 from django.db import models
 from user.models import CustomUser
 
-
 User = CustomUser
 
 
@@ -136,7 +135,8 @@ class Favorite(models.Model):
 class ShopList(models.Model):
     """ Модель для Листа Покупок. """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE,)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='cart_recipe')
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
                                related_name='cart_recipe')
 

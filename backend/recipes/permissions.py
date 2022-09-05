@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 
-class IsAuthenticated(permissions.BasePermission):
+class IsAuthenticatedOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.method in permissions.SAFE_METHODS
@@ -12,3 +12,4 @@ class IsAuthenticated(permissions.BasePermission):
             obj.author == request.user
             or request.method in permissions.SAFE_METHODS
             or request.user.is_superuser)
+#А нужен ли он вообще ?

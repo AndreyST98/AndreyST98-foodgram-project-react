@@ -1,5 +1,7 @@
+from django.db.models import Sum
+from django.http.response import HttpResponse
 from djoser.views import UserViewSet
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
@@ -9,13 +11,13 @@ from rest_framework.response import Response
 from user.models import CustomUser
 from user.serializers import CustomUserSerializer
 
-from .models import Favorite, Follow, Ingredient, Recipe, ShopList, Tag
+from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
+                     ShopList, Tag)
 from .serializers import (FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipeFollowSerializer,
                           RecipesCreateSerializer, RecipesSerializer,
                           TagSerializer, UserFollowSerializer)
-from .permissions import IsAuthenticated
-from .utils import delete_obj_view, adding_obj_view
+from .utils import adding_obj_view, delete_obj_view
 
 
 class CustomUserViewSet(UserViewSet):
@@ -28,11 +30,11 @@ class CustomUserViewSet(UserViewSet):
     permission_classes = (IsAuthenticated,)
 
     @action(detail=True, url_path='subscribe')
-    def user_subscribe_add(self, request, id):
+    def user_subscribe_add(self, request, pk):
         user = request.user
-        following = get_object_or_404(CustomUser, pk=id)
+        following = get_object_or_404(CustomUser, pk=pk)
         serializer = FollowCreateSerializer(
-            data={'user': user.id, 'following': id})
+            data={'user': user.pk, 'following': pk})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         follow = get_object_or_404(Follow, user=user, following=following)
@@ -41,9 +43,9 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @user_subscribe_add.mapping.delete
-    def user_subscribe_del(self, request, id):
+    def user_subscribe_del(self, request, pk):
         user = request.user
-        following = get_object_or_404(CustomUser, pk=id)
+        following = get_object_or_404(CustomUser, pk=pk)
         if not Follow.objects.filter(user=user,
                                      following=following).exists():
             return Response(['Вы не подписаны на этого пользователя'],
@@ -102,20 +104,16 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(detail=True, url_path='favorite', methods=['POST', 'GET'],
             permission_classes=[IsAuthenticated])
     def recipe_id_favorite(self, request, pk):
-        """
-        Метод добавления рецепта в избранное
-        с обработкой исключения .
-        """
+        """ Метод добавления рецепта в избранное. """
+
         user = request.user
         model = Favorite
         return adding_obj_view(model=model, user=user, pk=pk)
 
     @recipe_id_favorite.mapping.delete
     def recipe_id_favorite_del(self, request, pk):
-        """
-        Метод удаления рецепта в избранное
-        с обработкой исключения .
-        """
+        """ Метод удаления рецепта в избранное. """
+
         user = request.user
         model = Favorite
         return delete_obj_view(model=model, user=user, pk=pk)
@@ -123,20 +121,30 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(detail=True, url_path='shopping_cart', methods=['POST', 'GET'],
             permission_classes=[IsAuthenticated])
     def recipe_cart(self, request, pk):
-        """
-        Метод добавления рецепта в список покупок
-        с обработкой исключения .
-        """
+        """ Метод добавления рецепта в список покупок. """
+
         user = request.user
         model = ShopList
         return adding_obj_view(model=model, user=user, pk=pk)
 
     @recipe_cart.mapping.delete
     def recipe_cart_del(self, request, pk):
-        """
-        Метод удаления рецепта из списка покупок
-        с обработкой исключения .
-        """
+        """ Метод удаления рецепта из списка покупок. """
+
         user = request.user
         model = ShopList
         return delete_obj_view(model=model, user=user, pk=pk)
+
+    @action(detail=False,
+            url_path='download_shopping_cart',
+            methods=['GET', 'POST'],
+            permission_classes=[permissions.IsAuthenticated])
+    def download_cart_recipe(self, request):
+        """ Метод скачивания списка продуктов. """
+        ingredients_list = IngredientAmount.objects.filter(
+            recipe__cart_recipe__user=request.user
+        ).values('ingredient__name', 'ingredient__measurement_unit').order_by(
+            'ingredient__name').annotate(tolal_sum=Sum('amount'))
+        response = HttpResponse(ingredients_list, 'Content-Type: text/plain')
+        response['Content-Disposition'] = 'attachment; filename=cart_recipe'
+        return response
