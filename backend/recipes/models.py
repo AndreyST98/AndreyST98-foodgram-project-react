@@ -1,4 +1,3 @@
-from colorfield.fields import ColorField
 from django.conf import settings
 from django.core import validators
 from django.db import models
@@ -39,7 +38,7 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=100, unique=True,
-                            verbose_name='Ингридиент')
+                            verbose_name='Ингредиент')
     measurement_unit = models.CharField(max_length=50,
                                         verbose_name='Единицы измерения')
 
@@ -105,8 +104,8 @@ class IngredientAmount(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиенты в рецептах'
-    constraints = [
+        verbose_name = 'Ингредиенты в рецептах'
+        constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
                 name='unique_ingredient')]

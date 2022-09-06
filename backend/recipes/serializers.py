@@ -18,7 +18,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Ингридиенты"""
+    """Сериализатор для модели Ингредиенты"""
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
@@ -106,7 +106,7 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
                 IngredientAmount, id=items['id'])
             if ingredient in ingredient_list:
                 raise serializers.ValidationError(
-                    'Ингридиенты должны быть уникальными!')
+                    'Ингредиенты должны быть уникальными!')
             ingredient_list.append(ingredient)
         tags = data['tags']
         tags_list = []

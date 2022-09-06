@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
             name='Ingredient',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True, verbose_name='Ингридиент')),
+                ('name', models.CharField(max_length=100, unique=True, verbose_name='Ингредиент')),
                 ('measurement_unit', models.CharField(max_length=50, verbose_name='Единицы измерения')),
             ],
             options={
@@ -52,11 +52,11 @@ class Migration(migrations.Migration):
             name='IngredientAmount',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.PositiveIntegerField(default=1, validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество ингредиентов')),
-                ('ingredient', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='ingredients_in_recipe', to='recipes.ingredient', verbose_name='Ингредиент')),
+                ('amount', models.PositiveIntegerField(default=1, validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество Ингредиентов')),
+                ('ingredient', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='ingredients_in_recipe', to='recipes.ingredient', verbose_name='едиент')),
             ],
             options={
-                'verbose_name': 'Ингридиенты в рецептах',
+                'verbose_name': 'Ингредиенты в рецептах',
             },
         ),
         migrations.CreateModel(
