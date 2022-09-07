@@ -8,9 +8,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from user.models import CustomUser
-from user.serializers import CustomUserSerializer
 
+from user.serializers import CustomUserSerializer
+from user.models import CustomUser
 from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
                      ShopList, Tag)
 from .serializers import (FollowCreateSerializer, FollowSerializer,

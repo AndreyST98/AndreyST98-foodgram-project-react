@@ -1,8 +1,8 @@
 from djoser.serializers import UserCreateSerializer
-from recipes.models import Follow
 from rest_framework import serializers
 
 from .models import CustomUser
+from recipes.models import Follow
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
