@@ -170,31 +170,6 @@ class RecipeFollowSerializer(RecipesSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-# class UserFollowSerializer(CustomUserSerializer): 
-#     """ Сериализатор модели Пользователя, для отображения 
-#         в подписках. """ 
-#     recipes = serializers.SerializerMethodField() 
-#     recipes_count = serializers.SerializerMethodField() 
-
-#     class Meta: 
-#         fields = ('email', 'id', 'username', 'first_name', 'last_name', 
-#                   'is_subscribed', 'recipes', 'recipes_count') 
-#         model = CustomUser 
-
- 
-#     def get_recipes(self, obj): 
-#         request = self.context['request'] 
-#         limit = request.GET.get('recipes_limit') 
-#         queryset = Recipe.objects.filter(author=obj) 
-#         if limit: 
-#             queryset = queryset[:int(limit)] 
-#             return RecipeFollowSerializer(queryset, many=True).data 
-#         return RecipeFollowSerializer(queryset, many=True).data 
-
-#     def get_recipes_count(self, obj): 
-#         recipes = Recipe.objects.filter(author=obj) 
-#         return recipes.count() 
-
 class UserFollowSerializer(CustomUserSerializer):
     """ Сериализатор модели Пользователя, для отображения
         в подписках. """
