@@ -99,8 +99,7 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'user.serializers.UsersCreateSerializer',
         'user': 'user.serializers.CustomUserSerializer',
-        'current_user': 'user.serializers.CustomUserSerializer',
-        }
+        'current_user': 'user.serializers.CustomUserSerializer'},
 }
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'

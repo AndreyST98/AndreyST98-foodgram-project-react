@@ -220,6 +220,7 @@ class FollowSerializer(serializers.ModelSerializer):
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.following).count()
 
+
 class FollowCreateSerializer(serializers.ModelSerializer):
     """ Сериализатор создания объекта Подписки. """
     user = serializers.PrimaryKeyRelatedField(
@@ -228,6 +229,7 @@ class FollowCreateSerializer(serializers.ModelSerializer):
     following = serializers.PrimaryKeyRelatedField(
         queryset=CustomUser.objects.all(),
     )
+
     class Meta:
         model = Follow
         fields = ('user', 'following')
