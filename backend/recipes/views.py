@@ -14,8 +14,7 @@ from user.models import CustomUser
 from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
                      ShopList, Tag)
 from .serializers import (FollowCreateSerializer, FollowSerializer,
-                          IngredientSerializer, RecipeFollowSerializer,
-                          RecipesCreateSerializer, RecipesSerializer,
+                          IngredientSerializer, RecipesCreateSerializer, RecipesSerializer,
                           TagSerializer, UserFollowSerializer)
 from .utils import adding_obj_view, delete_obj_view
 
@@ -56,7 +55,6 @@ class CustomUserViewSet(UserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['GET'], url_path='subscriptions', detail=False)
-    #@action(methods=['GET'], detail=False)
     def subscriptions(self, request):
         user = request.user
         queryset = Follow.objects.filter(user=user)
@@ -67,7 +65,6 @@ class CustomUserViewSet(UserViewSet):
             context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
-        #return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -152,4 +149,3 @@ class RecipesViewSet(viewsets.ModelViewSet):
         response = HttpResponse(ingredients_list, 'Content-Type: text/plain')
         response['Content-Disposition'] = 'attachment; filename=cart_recipe'
         return response
-

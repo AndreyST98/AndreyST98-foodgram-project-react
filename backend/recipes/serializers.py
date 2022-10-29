@@ -1,12 +1,11 @@
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from rest_framework.validators import UniqueTogetherValidator
 
 from user.models import CustomUser
 from user.serializers import CustomUserSerializer
-from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
-                     ShopList, Tag)
+from recipes.models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
+                            ShopList, Tag)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -148,10 +147,8 @@ class RecipesCreateSerializer(serializers.ModelSerializer):
             instance.ingredients.clear()
             self.create_ingredients(ingredients, instance)
         if 'tags' in validated_data:
-            instance.tags.set(
-                validated_data.pop('tags'))
-        return super().update(
-            instance, validated_data)
+            instance.tags.set(validated_data.pop('tags'))
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         return RecipesSerializer(
@@ -182,11 +179,9 @@ class UserFollowSerializer(CustomUserSerializer):
         model = CustomUser
 
     def to_representation(self, instance):
-        authors = FollowSerializer(
-                  instance.following, context={
-                                   'request': self.context.get('request')}
-        )
+        authors = FollowSerializer(instance.following, context={'request': self.context.get('request')})
         return authors.data
+
 
 class FollowSerializer(serializers.ModelSerializer):
     """ Сериализатор для подписок. """
@@ -202,7 +197,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                 'is_subscribed', 'recipes', 'recipes_count',)
+                  'is_subscribed', 'recipes', 'recipes_count',)
         model = Follow
 
     def get_is_subscribed(self, obj):
