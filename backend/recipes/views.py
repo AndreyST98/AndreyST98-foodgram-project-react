@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+                                        IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
 
 from user.serializers import CustomUserSerializer
@@ -29,23 +29,24 @@ class CustomUserViewSet(UserViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAuthenticated,)
 
-    @action(detail=True, url_path='subscribe')
-    def user_subscribe_add(self, request, pk):
+    @action(detail=True, methods=['post'], url_path='subscribe')
+    def user_subscribe_add(self, request, id):
         user = request.user
-        following = get_object_or_404(CustomUser, pk=pk)
+        following = get_object_or_404(CustomUser, pk=id)
         serializer = FollowCreateSerializer(
-            data={'user': user.pk, 'following': pk})
+            data={'user': user.id, 'following': id},
+            context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         follow = get_object_or_404(Follow, user=user, following=following)
         serializer = UserFollowSerializer(follow.following,
-                                          context={'request': request})
+                                      context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @user_subscribe_add.mapping.delete
-    def user_subscribe_del(self, request, pk):
+    def user_subscribe_del(self, request, id):
         user = request.user
-        following = get_object_or_404(CustomUser, pk=pk)
+        following = get_object_or_404(CustomUser, pk=id)
         if not Follow.objects.filter(user=user,
                                      following=following).exists():
             return Response(['Вы не подписаны на этого пользователя'],
@@ -54,9 +55,9 @@ class CustomUserViewSet(UserViewSet):
         follow.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['get'], detail=False, url_path='subscriptions',
-            permission_classes=[IsAuthenticated])
-    def user_subscriptions(self, request):
+    @action(methods=['GET'], url_path='subscriptions', detail=False)
+    #@action(methods=['GET'], detail=False)
+    def subscriptions(self, request):
         user = request.user
         queryset = Follow.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
@@ -66,6 +67,7 @@ class CustomUserViewSet(UserViewSet):
             context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
+        #return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -73,6 +75,7 @@ class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
     filter_backends = [filters.SearchFilter]
+    pagination_class = None
     search_fields = ['name']
 
 
@@ -81,6 +84,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
     filter_backends = [filters.SearchFilter]
+    pagination_class = None
     search_fields = ['name']
 
 
@@ -148,3 +152,4 @@ class RecipesViewSet(viewsets.ModelViewSet):
         response = HttpResponse(ingredients_list, 'Content-Type: text/plain')
         response['Content-Disposition'] = 'attachment; filename=cart_recipe'
         return response
+

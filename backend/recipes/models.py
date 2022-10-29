@@ -153,10 +153,12 @@ class Follow(models.Model):
     """ Модель для Подписок. """
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE,
-                             related_name='follower')
+                             related_name='follower',
+                             verbose_name='Подписчик',)
     following = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   on_delete=models.CASCADE,
-                                  related_name='following')
+                                  related_name='following',
+                                  verbose_name='Автор',)
 
     class Meta:
         verbose_name = 'Подписка'
@@ -165,3 +167,6 @@ class Follow(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'following'],
                 name='unique_following')]
+
+    def __str__(self):
+        return f'{self.user} подписался на {self.following}'
