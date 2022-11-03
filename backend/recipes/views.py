@@ -8,7 +8,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
+from recipes.filters import IngredientsFilter
 from user.serializers import CustomUserSerializer
 from user.models import CustomUser
 from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
@@ -79,9 +81,9 @@ class IngredientViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientsFilter
     pagination_class = None
-    search_fields = ['name']
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
