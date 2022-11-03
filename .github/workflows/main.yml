@@ -83,9 +83,9 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |            
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest       
-            sudo docker-compose stop            
-            sudo docker-compose rm server-yp_backend_1
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest    
+            sudo docker-compose stop
+            sudo docker-compose rm backend
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
@@ -93,7 +93,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+            echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env
             sudo docker-compose up -d --build
             sudo docker-compose exec -T backend python manage.py makemigrations
             sudo docker-compose exec -T backend python manage.py migrate
