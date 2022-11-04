@@ -6,13 +6,14 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-#SECRET_KEY = "django-insecure-2p14n#^r81tmx7-=3i=iymu_rz7%ubmp8(2s=-$wke2^jf((yc"
 SECRET_KEY = os.getenv('SECRET_KEY', default='12345')
 
-DEBUG = False
+DEBUG = True
 
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='*').split(',')
 ALLOWED_HOSTS = ['*', 'localhost', '178.154.221.180']
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost/*', 'http://178.154.221.180/*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -114,7 +115,6 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', default='5432'),
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {

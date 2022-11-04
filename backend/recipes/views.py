@@ -10,7 +10,7 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
-from recipes.filters import IngredientsFilter
+from recipes.filters import IngredientsFilter, RecipeFilter
 from user.serializers import CustomUserSerializer
 from user.models import CustomUser
 from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
@@ -81,7 +81,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, ]
     filterset_class = IngredientsFilter
     pagination_class = None
 
@@ -90,8 +90,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = RecipesSerializer
     queryset = Recipe.objects.all().order_by('-id')
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name']
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PUT', 'PATCH'):
