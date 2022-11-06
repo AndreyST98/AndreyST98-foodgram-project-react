@@ -8,9 +8,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='12345')
 
-DEBUG = True
+DEBUG = False
 
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='*').split(',')
 ALLOWED_HOSTS = ['*', 'localhost', '178.154.221.180']
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost/*', 'http://178.154.221.180/*']
