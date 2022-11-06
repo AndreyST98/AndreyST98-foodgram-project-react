@@ -213,10 +213,6 @@ class FollowSerializer(serializers.ModelSerializer):
             queryset = queryset[:int(limit)]
         return RecipeFollowSerializer(queryset, many=True).data
 
-    # def get_recipes(self, obj):
-    #     recipes = Recipe.objects.filter(author=obj.author)
-    #     return RecipeFollowSerializer(recipes, many=True).data
-
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.following).count()
 
@@ -233,13 +229,6 @@ class FollowCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ('user', 'following')
-
-    # def to_representation(self, instance):
-    #     request = self.context.get('request')
-    #     return FollowSerializer(
-    #         instance.following,
-    #         context={'request': request},
-    #     ).data
 
     def validate(self, data):
         user = self.context.get('request').user
