@@ -20,22 +20,34 @@ admin@admin.com
 пароль: admin
 
 ## В папке infra проекта создать файл .env.
+**
 DB_ENGINE=django.db.backends.postgresql
+**
 DB_NAME=postgres
+**
 POSTGRES_USER=<имя пользователя>
+**
 POSTGRES_PASSWORD=<пароль>
+**
 DB_HOST=db
+**
 DB_PORT=5432
+**
 SECRET_KEY=<SECRET_KEY_Django>
+**
 
 ## Перейти в папку infra, создать и применить миграции, собрать статику, создать суперпользователя:
-
+**
 docker-compose up -d --build
+**
 docker-compose exec backend python manage.py makemigrations --noinput
+**
 docker-compose exec backend python manage.py migrate --noinput
+**
 docker-compose exec backend python manage.py collectstatic --no-input
+**
 docker-compose exec backend python manage.py createsuperuser
-```
+**
 
 ### Об авторе
 Степанюк Андрей, github.com/AndreyST98
