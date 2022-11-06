@@ -35,7 +35,7 @@ docker-compose exec backend python manage.py makemigrations --noinput
 docker-compose exec backend python manage.py migrate --noinput
 docker-compose exec backend python manage.py collectstatic --no-input
 docker-compose exec backend python manage.py createsuperuser
-```
 
-### Об авторе
+## Об авторе
+
 Степанюк Андрей, github.com/AndreyST98
