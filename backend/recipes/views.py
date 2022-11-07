@@ -92,6 +92,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('-id')
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
+    pagination_class = PageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PUT', 'PATCH'):
