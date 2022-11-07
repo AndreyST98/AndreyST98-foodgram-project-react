@@ -31,11 +31,11 @@ class CustomUserViewSet(UserViewSet):
     permission_classes = (IsAuthenticated,)
 
     @action(detail=True, methods=['POST'], url_path='subscribe')
-    def user_subscribe_add(self, request, pk):
+    def user_subscribe_add(self, request, id):
         user = request.user
-        following = get_object_or_404(CustomUser, pk=pk)
+        following = get_object_or_404(CustomUser, pk=id)
         serializer = FollowCreateSerializer(
-            data={'user': user.pk, 'following': pk},
+            data={'user': user.id, 'following': id},
             context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -44,9 +44,9 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @user_subscribe_add.mapping.delete
-    def user_subscribe_del(self, request, pk):
+    def user_subscribe_del(self, request, id):
         user = request.user
-        following = get_object_or_404(CustomUser, pk=pk)
+        following = get_object_or_404(CustomUser, pk=id)
         if not Follow.objects.filter(user=user,
                                      following=following).exists():
             return Response(['Вы не подписаны на этого пользователя'],
