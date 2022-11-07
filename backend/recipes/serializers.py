@@ -230,13 +230,6 @@ class FollowCreateSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ('user', 'following')
 
-    def to_representation(self, instance):
-        request = self.context.get('request')
-        return FollowSerializer(
-            instance.following,
-            context={'request': request},
-        ).data
-
     def validate(self, data):
         user = self.context.get('request').user
         following_id = data['following'].id

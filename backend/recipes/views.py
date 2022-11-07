@@ -30,12 +30,12 @@ class CustomUserViewSet(UserViewSet):
     pagination_class = PageNumberPagination
     permission_classes = (IsAuthenticated,)
 
-    @action(detail=True, methods=['post'], url_path='subscribe')
-    def user_subscribe_add(self, request, id):
+    @action(detail=True, methods=['POST'], url_path='subscribe')
+    def user_subscribe_add(self, request, pk):
         user = request.user
-        following = get_object_or_404(CustomUser, pk=id)
+        following = get_object_or_404(CustomUser, pk=pk)
         serializer = FollowCreateSerializer(
-            data={'user': user.id, 'following': id},
+            data={'user': user.pk, 'following': pk},
             context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -44,9 +44,9 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @user_subscribe_add.mapping.delete
-    def user_subscribe_del(self, request, id):
+    def user_subscribe_del(self, request, pk):
         user = request.user
-        following = get_object_or_404(CustomUser, pk=id)
+        following = get_object_or_404(CustomUser, pk=pk)
         if not Follow.objects.filter(user=user,
                                      following=following).exists():
             return Response(['Вы не подписаны на этого пользователя'],
