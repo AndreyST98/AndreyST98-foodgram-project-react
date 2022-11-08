@@ -19,7 +19,8 @@ from .serializers import (FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipesCreateSerializer, RecipesSerializer,
                           TagSerializer, UserFollowSerializer,)
 from .utils import adding_obj_view, delete_obj_view
-from .views import CustomPageNumberPagination
+from recipes.pagination import CustomPageNumberPagination
+
 
 
 class CustomUserViewSet(UserViewSet):
