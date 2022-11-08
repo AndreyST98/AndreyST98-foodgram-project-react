@@ -17,7 +17,7 @@ from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
                      ShopList, Tag)
 from .serializers import (FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipesCreateSerializer, RecipesSerializer,
-                          TagSerializer, UserFollowSerializer )
+                          TagSerializer, UserFollowSerializer,)
 from .utils import adding_obj_view, delete_obj_view
 
 
@@ -60,7 +60,7 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         queryset = Follow.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
-        serializer =  UserFollowSerializer(
+        serializer = UserFollowSerializer(
             pages,
             many=True,
             context={'request': request}
