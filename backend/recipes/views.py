@@ -17,7 +17,7 @@ from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
                      ShopList, Tag)
 from .serializers import (FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipesCreateSerializer, RecipesSerializer,
-                          TagSerializer, UserFollowSerializer)
+                          TagSerializer, UserFollowSerializer )
 from .utils import adding_obj_view, delete_obj_view
 
 
@@ -40,7 +40,7 @@ class CustomUserViewSet(UserViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         follow = get_object_or_404(Follow, user=user, following=following)
-        serializer = UserFollowSerializer(follow.following, context={'request': request})
+        serializer = FollowSerializer(follow.following, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @user_subscribe_add.mapping.delete
@@ -60,7 +60,7 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         queryset = Follow.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
-        serializer = FollowSerializer(
+        serializer =  UserFollowSerializer(
             pages,
             many=True,
             context={'request': request}
