@@ -19,6 +19,7 @@ from .serializers import (FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipesCreateSerializer, RecipesSerializer,
                           TagSerializer, UserFollowSerializer,)
 from .utils import adding_obj_view, delete_obj_view
+from .views import CustomPageNumberPagination
 
 
 class CustomUserViewSet(UserViewSet):
@@ -92,7 +93,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('-id')
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PUT', 'PATCH'):

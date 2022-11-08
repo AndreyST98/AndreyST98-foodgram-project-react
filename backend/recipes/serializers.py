@@ -185,37 +185,7 @@ class UserFollowSerializer(CustomUserSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     """ Сериализатор для подписок. """
-
-    # email = serializers.ReadOnlyField(source='following.email')
-    # id = serializers.ReadOnlyField(source='following.id')
-    # username = serializers.ReadOnlyField(source='following.email')
-    # first_name = serializers.ReadOnlyField(source='following.first_name')
-    # last_name = serializers.ReadOnlyField(source='following.last_name')
-    # is_subscribed = serializers.SerializerMethodField()
-    # recipes = serializers.SerializerMethodField()
-    # recipes_count = serializers.SerializerMethodField()
-
-    # class Meta:
-    #     fields = ('email', 'id', 'username', 'first_name', 'last_name',
-    #               'is_subscribed', 'recipes', 'recipes_count')
-    #     model = Follow
-
-    # def get_is_subscribed(self, obj):
-    #     return Follow.objects.filter(
-    #         user=obj.user, following=obj.following
-    #     ).exists()
-
-    # def get_recipes(self, obj):
-    #     request = self.context['request']
-    #     limit = request.GET.get('recipes_limit')
-    #     queryset = Recipe.objects.filter(author=obj.following)
-    #     if limit:
-    #         queryset = queryset[:int(limit)]
-    #     return RecipeFollowSerializer(queryset, many=True).data
-
-    # def get_recipes_count(self, obj):
-    #     return Recipe.objects.filter(author=obj.following).count()
-
+    
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -245,18 +215,8 @@ class FollowSerializer(serializers.ModelSerializer):
             recipes, many=True, context=context
         ).data
 
-    # def get_recipes(self, obj):
-    #     request = self.context['request']
-    #     limit = request.GET.get('recipes_limit')
-    #     queryset = Recipe.objects.filter(author=obj.following)
-    #     if limit:
-    #         queryset = queryset[:int(limit)]
-    #     return RecipeFollowSerializer(queryset, many=True).data
-
     def get_recipes_count(self, data):
         return data.recipes.count()
-    # def get_recipes_count(self, obj):
-    #     return Recipe.objects.filter(author=obj.following).count()
 
 
 class FollowCreateSerializer(serializers.ModelSerializer):
