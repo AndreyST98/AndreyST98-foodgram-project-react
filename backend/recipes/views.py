@@ -22,7 +22,6 @@ from .utils import adding_obj_view, delete_obj_view
 from recipes.pagination import CustomPageNumberPagination
 
 
-
 class CustomUserViewSet(UserViewSet):
     """ Вьюсет для модели пользователя с дополнительным операциями
         через GET запросы. """
