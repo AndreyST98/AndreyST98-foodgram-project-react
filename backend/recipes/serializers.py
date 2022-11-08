@@ -185,7 +185,7 @@ class UserFollowSerializer(CustomUserSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     """ Сериализатор для подписок. """
-    
+
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
