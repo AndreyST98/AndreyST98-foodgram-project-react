@@ -122,7 +122,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return delete_obj_view(model=model, user=user, pk=pk)
 
     @action(detail=True, url_path='shopping_cart', methods=['POST', 'GET'],
-            permission_classes=[IsAuthenticated], pagination_class=[PageNumberPagination])
+            permission_classes=[IsAuthenticated], pagination_class=[None])
     def recipe_cart(self, request, pk):
         """ Метод добавления рецепта в список покупок. """
 
@@ -142,7 +142,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             url_path='download_shopping_cart',
             methods=['GET', 'POST'],
             permission_classes=[permissions.IsAuthenticated],
-            pagination_class=[PageNumberPagination])
+            pagination_class=[None])
     def download_cart_recipe(self, request):
         """ Метод скачивания списка продуктов. """
         ingredients_list = IngredientAmount.objects.filter(
