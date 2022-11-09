@@ -198,12 +198,16 @@ class FollowSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
+    # def get_is_subscribed(self, data):
+    #     print(f'{data}')
+    #     #request = self.context.get('request')
+    #     user = self.context['request'].user
+    #     # if not user:
+    #     #     return False
+    #     return data.follower.filter(user=user).exists()
+
     def get_is_subscribed(self, data):
-        request = self.context.get('request')
-        user = self.context['request'].user
-        if not user:
-            return False
-        return data.follower.filter(following=request.user).exists()
+        return Follow.objects.filter(following=data).exists()
 
     def get_recipes(self, data):
         request = self.context.get('request')
