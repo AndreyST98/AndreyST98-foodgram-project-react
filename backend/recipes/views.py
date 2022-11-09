@@ -4,7 +4,6 @@ from djoser.views import UserViewSet
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
@@ -19,6 +18,7 @@ from .serializers import (FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipesCreateSerializer, RecipesSerializer,
                           TagSerializer, UserFollowSerializer,)
 from .utils import adding_obj_view, delete_obj_view
+from .pagination import CustomPageNumberPagination
 
 
 class CustomUserViewSet(UserViewSet):
@@ -27,7 +27,7 @@ class CustomUserViewSet(UserViewSet):
 
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPageNumberPagination
     permission_classes = (IsAuthenticated,)
 
     @action(detail=True, methods=['POST'], url_path='subscribe')
@@ -92,7 +92,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('-id')
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PUT', 'PATCH'):
@@ -122,7 +122,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return delete_obj_view(model=model, user=user, pk=pk)
 
     @action(detail=True, url_path='shopping_cart', methods=['POST', 'GET'],
-            permission_classes=[IsAuthenticated], pagination_class=[None])
+            permission_classes=[IsAuthenticated])
     def recipe_cart(self, request, pk):
         """ Метод добавления рецепта в список покупок. """
 
@@ -141,8 +141,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     @action(detail=False,
             url_path='download_shopping_cart',
             methods=['GET', 'POST'],
-            permission_classes=[permissions.IsAuthenticated],
-            pagination_class=[None])
+            permission_classes=[permissions.IsAuthenticated])
     def download_cart_recipe(self, request):
         """ Метод скачивания списка продуктов. """
         ingredients_list = IngredientAmount.objects.filter(
